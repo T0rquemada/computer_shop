@@ -1,6 +1,6 @@
 # Computer shop
 
-*In this webpage I use PHP 8.3*
+*This webpage uses PHP version 8.3*
 
 ## Prerequisites
 - You have installed and running [MySQL](https://www.mysql.com/)
@@ -25,11 +25,12 @@
   - [ ] Store order on submit in orders.json
   - [ ] Clearing cart button
   - [ ] Storing not submitted cart in localstorage
+  - [ ] Show quantity of items on "Cart" button in right corner of word
 ## Level 2
 - [X] Theme switcher
-  - [ ] Save user choice in localstorage
+  - [X] Save user choice in localstorage
 - [ ] Item details (pop up / separate page)
-- - [ ] Selecting mail from existed mails
+  - [ ] Selecting mail from existed mails
 - [ ] Make categories in sidebar generating dynamically
 ## Level 3
 - [ ] Submit pop up on "Enter"

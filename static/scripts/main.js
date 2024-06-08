@@ -1,5 +1,6 @@
 window.onload = () => {
     checkSigned(); // Check user credentials in cookies
+    checkTheme();
 }
 
 // Add/remove 'active' class for HTML element
@@ -202,15 +203,37 @@ function removeInputsPopup() {
     inputContainers.forEach(element => element.remove());
 }
 
-function changeTheme() {
+function checkTheme() {
+    let currentTheme = localStorage.getItem('theme');
+    console.log(currentTheme);
+    if (currentTheme === 'white') {
+        console.log('here');    
+        changeTheme('white')
+    }
+    else if (currentTheme === 'black') changeTheme('black');
+}
+
+function changeTheme(localTheme=undefined) {
+    if (localTheme !== undefined) {
+        if (localTheme === 'white') {
+            root.style.setProperty('--white', 'white');
+            root.style.setProperty('--black', 'black');
+        } else if (localTheme === 'black') {
+            root.style.setProperty('--white', 'black');
+            root.style.setProperty('--black', 'white');
+        }
+    }
+    
     let currentColor = getComputedStyle(root).getPropertyValue('--white').trim();
 
     if (currentColor === 'white') {
         root.style.setProperty('--white', 'black');
         root.style.setProperty('--black', 'white');
+        localStorage.setItem('theme', 'white');
     } else {
         root.style.setProperty('--white', 'white');
         root.style.setProperty('--black', 'black');
+        localStorage.setItem('theme', 'black');
     }
 }
 
