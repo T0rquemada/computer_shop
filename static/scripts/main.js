@@ -205,35 +205,40 @@ function removeInputsPopup() {
 
 function checkTheme() {
     let currentTheme = localStorage.getItem('theme');
-    console.log(currentTheme);
-    if (currentTheme === 'white') {
-        console.log('here');    
-        changeTheme('white')
-    }
+
+    if (currentTheme === 'white')  changeTheme('white');
     else if (currentTheme === 'black') changeTheme('black');
+}
+
+function switchWhiteTheme() {
+    root.style.setProperty('--white', 'black');
+    root.style.setProperty('--black', 'white');
+}
+
+function switchBlackTheme() {
+    root.style.setProperty('--white', 'white');
+    root.style.setProperty('--black', 'black');
 }
 
 function changeTheme(localTheme=undefined) {
     if (localTheme !== undefined) {
-        if (localTheme === 'white') {
-            root.style.setProperty('--white', 'white');
-            root.style.setProperty('--black', 'black');
-        } else if (localTheme === 'black') {
-            root.style.setProperty('--white', 'black');
-            root.style.setProperty('--black', 'white');
+        if (localTheme === 'black') {
+            switchBlackTheme();
+        } else if (localTheme === 'white') {
+            switchWhiteTheme();
         }
+
+        return;
     }
     
-    let currentColor = getComputedStyle(root).getPropertyValue('--white').trim();
-
+    let currentColor = getComputedStyle(root).getPropertyValue('--black').trim();
+    
     if (currentColor === 'white') {
-        root.style.setProperty('--white', 'black');
-        root.style.setProperty('--black', 'white');
-        localStorage.setItem('theme', 'white');
-    } else {
-        root.style.setProperty('--white', 'white');
-        root.style.setProperty('--black', 'black');
+        switchBlackTheme();
         localStorage.setItem('theme', 'black');
+    } else {
+        switchWhiteTheme();
+        localStorage.setItem('theme', 'white');
     }
 }
 
