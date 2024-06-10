@@ -40,7 +40,7 @@ input {
 .sidebar__container {
     margin: 1rem;
     padding: 1rem;
-    width: 25%;
+    width: 15%;
     height: fit-content;
     flex-shrink: 0;
 }
@@ -192,6 +192,7 @@ header {
 #items__list {
     display: flex;
     flex-wrap: wrap;
+    height: fit-content;
 }
 
 .item__container {
@@ -200,12 +201,32 @@ header {
     width: 7.5rem;
     height: 10rem;
 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
     border: 1px solid var(--white);
     border-radius: 5px;
 }
 
+.item__buybtn {
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--white);
+}
+
 .category__title {
     cursor: pointer;
+}
+
+.filter__container {
+    margin: 1rem 0;
+}
+
+@media (max-width: 64rem) {
+    .sidebar__container {
+        width: 22%;
+    }
 }
 
 @media (max-width: 45rem) {
@@ -217,5 +238,9 @@ header {
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+
+    .sidebar__container {
+        width: 40%;
     }
 }
