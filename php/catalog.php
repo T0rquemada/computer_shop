@@ -2,10 +2,19 @@
 /** @var PDO $pdo */
 require "database.php";
 
+function get_items($pdo, $category) {
+    $sql = $pdo->prepare("SELECT * FROM $category");
+    $sql->execute();
+    $items = $sql->fetchAll(PDO::FETCH_ASSOC);
+    
+    return $items;
+}
+
 $requested_url = $_SERVER['REQUEST_URI'];
 $base_url = '/php/catalog.php';
 $route = str_replace($base_url, '', $requested_url);
 
+// Routes for GET-requests
 if($_SERVER['REQUEST_METHOD'] == 'GET') {
     $category = null;
 
@@ -26,8 +35,6 @@ if($_SERVER['REQUEST_METHOD'] == 'GET') {
             break;
     }
 
-    $sql = $pdo->prepare("SELECT * FROM $category");
-    $sql->execute();
-    $items = $sql->fetchAll(PDO::FETCH_ASSOC);
+    $items = get_items($pdo, $category);
     echo json_encode($items);
 }
