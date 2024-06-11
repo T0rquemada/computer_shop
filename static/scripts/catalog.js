@@ -15,6 +15,60 @@ async function get_items(route) {
 
 const itemsList = document.getElementById('items__list');
 
+function saveToCart(items) {
+    items = JSON.stringify(items);
+    localStorage.setItem('cart', items);
+    console.log('item added to cart successfully!');
+}
+
+function clearCart() {
+    localStorage.removeItem('cart');
+}
+
+function getCurrentCart() {
+    let items = localStorage.getItem('cart');
+    if (items) {
+        return JSON.parse(items);
+    }
+
+    return undefined;
+}
+
+// clearCart();
+
+function addToCart(id, category) {
+    let item = {
+        id: id,
+        category: category
+    };
+
+    let items = getCurrentCart();
+
+    let added = false;
+
+    if (items !== undefined) {
+        // Check that item already exist in cart, if yes - add 1 to quantity
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].id == item.id) {
+                items[i].quantity++;
+                added = true;
+            }
+        }
+
+        if (!added) {
+            item['quantity'] = 1;
+            items.push(item);
+        }
+
+        clearCart();
+    } else {    // If cart is empty
+        item['quantity'] = 1;
+        items = [item];
+    }
+
+    saveToCart(items);  
+}
+
 // Return item in div
 function createItem(item, categoryTitle) {
 
@@ -56,8 +110,9 @@ function createItem(item, categoryTitle) {
     buyBtn.textContent = 'Add to cart'
 
     buyBtn.addEventListener('click', () => {
-        console.log(item_container.id);
-        console.log(item_container.getAttribute('category'));
+        let id = item_container.id;
+        let category = item_container.getAttribute('category');
+        addToCart(id, category);
     });
 
     lowerPart.appendChild(itemPrice);
