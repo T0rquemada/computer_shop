@@ -42,7 +42,20 @@ function saveUser(email, password) {
     document.cookie = `user_password=${encodeURIComponent(password)}; path=/; max-age=604800`;
 }
 
-function getUseFromCookie() {
+function getUserId() {
+    let email = getUserFromCookie()[0];
+
+    return fetch('http://localhost:8080/php/users.php/userid', {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_email: email})
+    })
+    .then(response => response.json())
+    .then(data => {return data})
+    .catch(e => console.error(e))
+}
+
+function getUserFromCookie() {
     const cookies = document.cookie.split(';');
 
     let email = '';
@@ -101,7 +114,7 @@ function userSigned() {
 
 // Make request to log in user
 async function checkSigned() {
-    let userCookie = getUseFromCookie();
+    let userCookie = getUserFromCookie();
 
     if (userCookie !== undefined) {
         let userEmail = userCookie[0];

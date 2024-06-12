@@ -82,13 +82,13 @@ function verify_user($pdo, $user): bool {
     return false;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $requested_url = $_SERVER['REQUEST_URI'];
-    $base_url = '/php/users.php';
-    $route = str_replace($base_url, '', $requested_url);    // Cut off base_url from requested_url
-    $userdata = get_json_input();
-    check_json_error();
+$requested_url = $_SERVER['REQUEST_URI'];
+$base_url = '/php/users.php';
+$route = str_replace($base_url, '', $requested_url);    // Cut off base_url from requested_url
+$userdata = get_json_input();
+check_json_error();
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Routing for sin in/sign up
     switch ($route) {
         case '/signup':
@@ -126,6 +126,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else echo "Incorrect JSON data while sign in!\n";
 
             break;
+        default:
+            header("HTTP/1.0 404 Not Found");
+            echo "Route not found";
+            break;
+    }
+} else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    switch ($route) {
         case '/userid':
             if (isset($userdata['email'])) {
                 echo get_userid($userdata['email']);
