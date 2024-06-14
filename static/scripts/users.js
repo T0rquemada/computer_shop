@@ -45,10 +45,9 @@ function saveUser(email, password) {
 function getUserId() {
     let email = getUserFromCookie()[0];
 
-    return fetch('http://localhost:8080/php/users.php/userid', {
+    return fetch(`http://localhost:8080/php/users.php/userid?email=${email}`, {
         method: 'GET',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({user_email: email})
+        headers: {'Content-Type': 'application/json'}
     })
     .then(response => response.json())
     .then(data => {return data})
