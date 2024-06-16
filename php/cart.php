@@ -21,7 +21,7 @@ function cart_exist(int $user_id) : bool {
 function create_cart($user_id, $items) {
     global $pdo;
     $stmt = $pdo->prepare('INSERT INTO cart (user_id, items) VALUES (?, ?)');
-    $stmt->execute([$user_id, json_encode($items)]);
+    $stmt->execute([$user_id, json_encode([$items])]);
 }
 
 function get_cart($pdo, $user_id) {
@@ -32,24 +32,28 @@ function get_cart($pdo, $user_id) {
     return $cart;
 }
 
-// Unite items with same item_id, and sum their quantity, to avoid duplicates same items
+// Unite items with same item_id, and sum their quantity, to avoid duplicates in 'items'
 function unite_items($items) {
     $united_items = [];
-
+    
     foreach ($items as $item) {
-        $item_id = $item['item_id'];
+        $item_id = $item['id'];
+        $item_category = $item['category'];
         $quantity = (int)$item['quantity'];
 
-        if (isset($united_items[$item_id])) {
-            // If item_id exists, add quantity to existing quantity
-            $united_items[$item_id]['quantity'] += $quantity;
+        // Composite key based on id and category
+        $composite_key = $item_id . '-' . $item_category;
+
+        if (isset($united_items[$composite_key])) {
+            // Add quantity to the existing quantity
+            $united_items[$composite_key]['quantity'] += $quantity;
         } else {
-            // If item_id doesn't exist, add the item to united_items
-            $united_items[$item_id] = $item;
+            // Add the item to united_items
+            $united_items[$composite_key] = $item;
         }
     }
 
-    // Convert united_items array back to indexed array
+    // Convert to indexed array
     $united_items = array_values($united_items);
 
     return $united_items;
@@ -59,14 +63,17 @@ function update_cart($user_id, $new_item) {
     global $pdo;
 
     $cart = get_cart($pdo, $user_id);
+    
     if ($cart) {
-        $items = json_decode($cart['items'], true);   // Collect already added in DB items   
-        array_push($items, $new_item[0]);  // Add new item to array
-        $items = unite_items($items); // Unite items with same item_id
-        $updated_items = json_encode($items);
+        $items = json_decode($cart['items'], true); 
+        try {
+            $items[] = $new_item;
+            $items = unite_items($items);
+            $updated_items = json_encode($items);
 
-        $stmt = $pdo->prepare('UPDATE cart SET items = ? WHERE user_id = ?');
-        $stmt->execute([$updated_items, $user_id]);
+            $stmt = $pdo->prepare('UPDATE cart SET items = ? WHERE user_id = ?');
+            $stmt->execute([$updated_items, $user_id]);
+        } catch (Exception $e) {echo $e;}
     }
 }
 
@@ -75,9 +82,8 @@ function delete_cart($user_id) {
     $stmt = $pdo->prepare('DELETE FROM cart WHERE user_id = ?');
 }
 
-$cart_data = get_json_input();
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $cart_data = get_json_input();
     $requested_url = $_SERVER['REQUEST_URI'];
     $base_url = '/php/cart.php';
     $route = str_replace($base_url, '', $requested_url);    // Cut off base_url from requested_url
@@ -87,11 +93,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $correct_data = isset($cart_data['user_id'], $cart_data['item']);
             if ($correct_data) {
                 if (cart_exist($cart_data['user_id'])) {
-                    update_cart($cart_data['user_id'], $cart_data['item'], $cart_data['quantity']);
+                    update_cart($cart_data['user_id'], $cart_data['item']);
+                    echo 'update existing cart';
                 } else {
-                    create_cart($cart_data['user_id'], $cart_data['item'], $cart_data['quantity']);
+                    create_cart($cart_data['user_id'], $cart_data['item']);
+                    echo 'create cart';
                 }
-            } else echo 'Incorrect json cart data while updateing cart!';
+            } else echo 'Incorrect json cart data while updating cart!';
             
             break;
         default:
