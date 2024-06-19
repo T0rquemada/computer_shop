@@ -82,6 +82,22 @@ function delete_cart($user_id) {
     $stmt = $pdo->prepare('DELETE FROM cart WHERE user_id = ?');
 }
 
+function get_item($item_id, $category) {
+    global $pdo;
+
+    $id = $category . "_id";
+
+    $sql = $pdo->prepare("SELECT * FROM $category WHERE $id = ?");
+    $sql->execute([$item_id]);
+    $item = $sql->fetch(PDO::FETCH_ASSOC);
+    
+    if ($item) {
+        return $item;
+    } else {
+        return 0;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cart_data = get_json_input();
     $requested_url = $_SERVER['REQUEST_URI'];
@@ -105,6 +121,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         default:
             echo 'Default case for switch.';
             break;
+    }
+} else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (isset($_GET['user_id'])) {
+        $user_id = $_GET['user_id'];
+        $cart = get_cart($pdo, $user_id);
+        echo json_encode($cart);
+    } else if (isset($_GET['item_id'], $_GET['category'])) {
+        $item_id = $_GET['item_id'];
+        $category = $_GET['category'];
+
+        $item = get_item($item_id, $category);
+        
+        if ($item === 0) echo json_encode("Error while get item from cart.");
+        else echo json_encode($item); 
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'DELETE' && isset($cart_data['user_id'])) {
     $user_id = $cart_data['user_id'];

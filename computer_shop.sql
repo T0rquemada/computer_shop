@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `motherboards` (
 	`motherboard_id` INT NOT NULL AUTO_INCREMENT UNIQUE,
 	`brand` VARCHAR(255) NOT NULL,
     `title` VARCHAR(255) NOT NULL,
-	`Socket` VARCHAR(255) NOT NULL,
+	`socket` VARCHAR(255) NOT NULL,
 	`form_factor` VARCHAR(255) NOT NULL,
     `price` INT NOT NULL,
 	PRIMARY KEY(`motherboard_id`)
@@ -79,8 +79,15 @@ CREATE TABLE IF NOT EXISTS `ram` (
 	PRIMARY KEY(`ram_id`)
 );
 
+CREATE TABLE `cart` (
+	`cart_id` INT NOT NULL AUTO_INCREMENT UNIQUE,
+	`user_id` INT NOT NULL UNIQUE,
+	`items` JSON NOT NULL,
+	PRIMARY KEY(`cart_id`)
+);
+
 -- Inserting data in created tables
-/*INSERT INTO `categories` (`title`) VALUES
+INSERT INTO `categories` (`title`) VALUES
     ("cpu"),
     ("gpu"),
     ("motherboads"),
@@ -110,4 +117,3 @@ INSERT INTO `motherboards` (`brand`, `title`, `Socket`, `form_factor`, price) VA
     ("MSI", "MAG B550", "AM4", "ATX", 6899),
     ("ASUS", "ROG STRIZ", "AM5", "ATX", 14499),
     ("Gigabyte", "B550M", "AM4", "MicroATX", 4399);
-*/

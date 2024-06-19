@@ -15,115 +15,6 @@ async function get_items(route) {
 
 const itemsList = document.getElementById('items__list');
 
-function saveToCart(items) {
-    items = JSON.stringify(items);
-    localStorage.setItem('cart', items);
-    console.log('item added to cart successfully!');
-}
-
-function clearCart() {
-    localStorage.removeItem('cart');
-}
-
-function getCurrentCart() {
-    let items = localStorage.getItem('cart');
-    if (items) {
-        return JSON.parse(items);
-    }
-
-    return undefined;
-}
-
-// clearCart();
-
-function addToCart(id, category) {
-    let item = {
-        id: id,
-        category: category
-    };
-
-    let items = getCurrentCart();
-
-    let added = false;
-
-    if (items !== undefined) {
-        // Check that item already exist in cart, if yes - add 1 to quantity
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].id == item.id) {
-                items[i].quantity++;
-                added = true;
-            }
-        }
-
-        if (!added) {
-            item['quantity'] = 1;
-            items.push(item);
-        }
-
-        clearCart();
-    } else {    // If cart is empty
-        item['quantity'] = 1;
-        items = [item];
-    }
-
-    saveToCart(items);  
-}
-
-// Return item in div
-function createItem(item, categoryTitle) {
-
-    let itemId;
-
-    if (categoryTitle === 'motherboards') {
-        let motherboard_id = categoryTitle.slice(0, categoryTitle.length-1)
-        itemId = item[motherboard_id + '_id'];
-    } else {
-        itemId = item[categoryTitle + '_id'];
-    }
-
-    let itemCategory = categoryTitle;
-
-    let {title, brand, price} = item;
-    const item_container = document.createElement('div');
-    item_container.id = itemId;
-    item_container.setAttribute('category', itemCategory);
-    item_container.className = 'item__container';
-
-    let upperPart = document.createElement('div');
-
-    let itemTitle = document.createElement('div');
-    itemTitle.className = 'item__title';
-    if (title === ' ') itemTitle.textContent = brand;
-    else itemTitle.textContent = title;
-
-    let itemPrice = document.createElement('div');
-    itemPrice.className = 'item__price';
-    itemPrice.textContent = price + '\u20B4';       // Ukrainian grivnya symbol
-
-    upperPart.appendChild(itemTitle);
-
-    let lowerPart = document.createElement('div');
-    lowerPart.style.textAlign = 'center';
-
-    let buyBtn = document.createElement('button');
-    buyBtn.className = 'item__buybtn';
-    buyBtn.textContent = 'Add to cart'
-
-    buyBtn.addEventListener('click', () => {
-        let id = item_container.id;
-        let category = item_container.getAttribute('category');
-        addToCart(id, category);
-    });
-
-    lowerPart.appendChild(itemPrice);
-    lowerPart.appendChild(buyBtn);
-
-    item_container.appendChild(upperPart);
-    item_container.appendChild(lowerPart);
-
-    return item_container;
-}
-
 function sortItems(items) {
     if (sortOrder === 'asc') {
         items.sort(function(a, b) {
@@ -268,6 +159,65 @@ function filterItems(items) {
 }
 
 function generateItems(items, categoryTitle) {
+    // Return item in div
+    function createItem(item, categoryTitle) {
+
+        let itemId;
+
+        if (categoryTitle === 'motherboards') {
+            let motherboard_id = categoryTitle.slice(0, categoryTitle.length-1)
+            itemId = item[motherboard_id + '_id'];
+        } else {
+            itemId = item[categoryTitle + '_id'];
+        }
+
+        let itemCategory = categoryTitle;
+
+        let {title, brand, price} = item;
+        const item_container = document.createElement('div');
+        item_container.id = itemId;
+        item_container.setAttribute('category', itemCategory);
+        item_container.className = 'item__container';
+
+        let upperPart = document.createElement('div');
+
+        let itemTitle = document.createElement('div');
+        itemTitle.className = 'item__title';
+        if (title === ' ') itemTitle.textContent = brand;
+        else itemTitle.textContent = title;
+
+        let itemPrice = document.createElement('div');
+        itemPrice.className = 'item__price';
+        itemPrice.textContent = price + '\u20B4';       // Ukrainian grivnya symbol
+
+        upperPart.appendChild(itemTitle);
+
+        let lowerPart = document.createElement('div');
+        lowerPart.style.textAlign = 'center';
+
+        let buyBtn = document.createElement('button');
+        buyBtn.className = 'item__buybtn';
+        buyBtn.textContent = 'Add to cart'
+
+        buyBtn.addEventListener('click', () => {
+            if (signed) {
+                let id = item_container.id;
+                let category = item_container.getAttribute('category');
+                addToCart(id, category);
+            } else {
+                alert('You should be signed!');
+            }
+        });
+
+        lowerPart.appendChild(itemPrice);
+        lowerPart.appendChild(buyBtn);
+
+        item_container.appendChild(upperPart);
+        item_container.appendChild(lowerPart);
+
+        return item_container;
+    }
+
     itemsList.textContent = '';
 
     try {

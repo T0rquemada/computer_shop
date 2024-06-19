@@ -19,21 +19,22 @@
 # ToDo
 ## Level 1
 - [X] Sort items by price
-- [ ] Filter items by characteristics
+- [X] Filter items by characteristics
 - [ ] Cart chosen items
-  - [ ] Add/remove from cart
+  - [ ] Add/remove to/from cart
   - [ ] Store order on submit in orders.json
   - [ ] Clearing cart button
-  - [ ] Storing not submitted cart in localstorage
-  - [ ] Show quantity of items on "Cart" button in right corner of word
+  - [X] Storing not submitted cart in DB
+- [ ] User can select only mails from DB
 ## Level 2
 - [X] Theme switcher
   - [X] Save user choice in localstorage
 - [ ] Item details (pop up / separate page)
-  - [ ] Selecting mail from existed mails
-- [ ] Make categories in sidebar generating dynamically
+- [ ] Show quantity of items on "Cart" button in right corner of word
 ## Level 3
 - [ ] Submit pop up on "Enter"
+- [ ] Make categories in sidebar generating dynamically
+- [ ] Remove price from filters
 
 ## Project tree
 ![project tree](tree.png)

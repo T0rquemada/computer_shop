@@ -42,7 +42,7 @@ function saveUser(email, password) {
     document.cookie = `user_password=${encodeURIComponent(password)}; path=/; max-age=604800`;
 }
 
-function getUserId() {
+async function getUserId() {
     let email = getUserFromCookie()[0];
 
     return fetch(`http://localhost:8080/php/users.php/userid?email=${email}`, {
@@ -95,7 +95,7 @@ function signUp(user) {
 signupBtn.addEventListener('click', () => {
     removeInputsPopup();
     fillSignPopup();
-    popupTitle.textContent = 'Sign Up';
+    setPopupTitle('Sign Up');
     nickDiv.style.display = 'flex'; // Show nickname input
     active(popup__screen);
 });
@@ -160,7 +160,7 @@ function signIn(user) {
 signinBtn.addEventListener('click', () => {
     removeInputsPopup();
     fillSignPopup(true);
-    popupTitle.textContent = 'Sign In';
+    setPopupTitle('Sign In');
     nickDiv.style.display = 'none'; // Hide nickname input
     active(popup__screen);
 });

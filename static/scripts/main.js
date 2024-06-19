@@ -3,6 +3,10 @@ window.onload = () => {
     checkTheme();
 }
 
+function setPopupTitle(title) {
+    popupTitle.textContent = title;
+}
+
 // Add/remove 'active' class for HTML element
 function active(element, status= true) {
     if (status === true) {
@@ -36,7 +40,7 @@ function showSigninBtns() {
 }
 
 // Make POST-request on server with endpoint, sending object
-function postRequest(object, php_file) {
+async function postRequest(object, php_file) {
     return fetch(`http://localhost:8080/php/${php_file}`, {
         method: 'POST',
         headers: {
@@ -81,6 +85,10 @@ function postRequest(object, php_file) {
         });
 }
 
+const headerTitle = document.getElementById('header__title');
+headerTitle.addEventListener('click', () => {
+    window.location.href = '../../index.php';
+});
 
 /*Pop up part*/
 const popup__screen = document.getElementById('pop_up__screen');
@@ -91,23 +99,25 @@ const popupSubmit = document.getElementById('pop_up__submit');
 const popupTitle = document.getElementById('pop_up__title');
 const popupFooter = document.getElementById('pop_up__footer');
 
-// Hide pop up on Close
-popupClose.addEventListener('click', () => {
+function closePopup() {
     active(popup__screen, false);
     removeInputsPopup();
+}
+
+// Hide pop up on Close
+popupClose.addEventListener('click', () => {
+    closePopup();
 });
 
 // Hide pop-up when user press 'Escape'
 window.addEventListener('keydown', (key) => {
     if (key.key === 'Escape') {
-        active(popup__screen, false);
-        removeInputsPopup();
+        closePopup();
     }
 });
 
 popupCancel.addEventListener('click', () => {
-    active(popup__screen, false);
-    removeInputsPopup();
+    closePopup();
 });
 
 popupSubmit.addEventListener('click', () => {
@@ -120,6 +130,9 @@ popupSubmit.addEventListener('click', () => {
                 break;
             case 'Sign In':
                 submitUser(signIn, true);
+                break;
+            case 'Cart':
+                submitOrder();
                 break;
             default:
                 throw new Error('Error while submitting...');
@@ -247,4 +260,18 @@ const root = document.documentElement;
 
 themeBtn.addEventListener('click', () => {
     changeTheme();
+});
+
+/*Cart part*/
+let cartBtn = document.getElementById('items_cart');
+
+cartBtn.addEventListener('click', async () => {
+    if (signed) {
+        if (window.location.href.indexOf('static/pages/cart.php') === -1) {
+            window.location.href = 'static/pages/cart.php';
+        }
+    } else {
+        alert('You should be signed!');
+    }
+    
 });
