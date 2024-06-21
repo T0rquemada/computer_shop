@@ -2,6 +2,8 @@
 /** @var PDO $pdo */
 require "database.php";
 
+header('Content-Type: application/json');
+
 // Return body requests, decoding from JSON
 function get_json_input() {
     $jsonData = file_get_contents('php://input');
@@ -24,7 +26,8 @@ function create_cart($user_id, $items) {
     $stmt->execute([$user_id, json_encode([$items])]);
 }
 
-function get_cart($pdo, $user_id) {
+function get_cart($user_id) {
+    global $pdo;
     $stmt = $pdo->prepare('SELECT * FROM cart WHERE user_id = ?');
     $stmt->execute([$user_id]);
     $cart = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -62,7 +65,7 @@ function unite_items($items) {
 function update_cart($user_id, $new_item) {
     global $pdo;
 
-    $cart = get_cart($pdo, $user_id);
+    $cart = get_cart($user_id);
     
     if ($cart) {
         $items = json_decode($cart['items'], true); 
@@ -82,15 +85,37 @@ function delete_cart($user_id) {
     $stmt = $pdo->prepare('DELETE FROM cart WHERE user_id = ?');
 }
 
-function get_item($item_id, $category) {
+function get_item($item_id, $category, $user_id=null, $cart=false) {
     global $pdo;
 
-    $id = $category . "_id";
-
-    $sql = $pdo->prepare("SELECT * FROM $category WHERE $id = ?");
-    $sql->execute([$item_id]);
-    $item = $sql->fetch(PDO::FETCH_ASSOC);
+    $sql;
+    $item;
+    $items;
     
+    // If item from cart
+    if ($cart) {
+        $items = get_cart($user_id);
+    } else {
+        $id = $category . "_id";
+        $sql = $pdo->prepare("SELECT * FROM $category WHERE $id = ?");
+        $sql->execute([$item_id]);
+        $item = $sql->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    // Return specific item from cart depending on id & category
+    if ($cart) {
+        $items = $items['items']; // Extract all items from cart
+
+        $items = json_decode($items, true);
+
+        foreach ($items as $element) {
+            if ($element['id'] == $item_id && $element['category'] == $category) {
+                return $element;
+            }
+        }
+        return null;
+    }
+
     if ($item) {
         return $item;
     } else {
@@ -98,8 +123,34 @@ function get_item($item_id, $category) {
     }
 }
 
+// Replace item in cart['items']
+function replace_item($new_item, $old_item, $user_id) {
+    global $pdo;
+    $cart = get_cart($user_id);
+    $items = json_decode($cart['items'], true);
+    
+    foreach ($items as &$item) {
+        if ($item['id'] === $old_item['id'] && $item['category'] === $old_item['category']) {
+            $item['quantity'] = $new_item['quantity'];
+        }
+    }
+
+    unset($item);
+    
+    $stmt = $pdo->prepare('UPDATE cart SET items = ? WHERE user_id = ?');
+    $stmt->execute([json_encode($items), $user_id]);
+
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Quantity updated!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'No rows affected.']);
+    }
+    
+}
+
+$cart_data = get_json_input();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $cart_data = get_json_input();
     $requested_url = $_SERVER['REQUEST_URI'];
     $base_url = '/php/cart.php';
     $route = str_replace($base_url, '', $requested_url);    // Cut off base_url from requested_url
@@ -125,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (isset($_GET['user_id'])) {
         $user_id = $_GET['user_id'];
-        $cart = get_cart($pdo, $user_id);
+        $cart = get_cart($user_id);
         echo json_encode($cart);
     } else if (isset($_GET['item_id'], $_GET['category'])) {
         $item_id = $_GET['item_id'];
@@ -142,4 +193,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (cart_exist($user_id)) {
         delete_cart($user_id);
     } else echo "Cart user with id: " . $user_id . ", doesn't exist.";
-}
+} else if ($_SERVER['REQUEST_METHOD'] === 'PUT' && isset($cart_data['category'], $cart_data['item_id'], $cart_data['new_quantity'])) {
+    $category = $cart_data['category'];
+    $item_id = $cart_data['item_id'];
+    $new_quantity = $cart_data['new_quantity'];
+    $user_id = $cart_data['user_id'];
+
+    try {
+        $old_item = get_item($item_id, $category, $user_id, true);
+        $new_item = array_merge($old_item, ['quantity' => $new_quantity]);  // Item with updated 'quantity'
+
+        replace_item($new_item, $old_item, $user_id);
+    } catch (PDOException $e) {
+        echo json_encode(['status' => 'error', 'message' => 'Error updating quantity: ' . $e->getMessage()]);
+    }
+} else echo json_encode(['status' => 'Undefined route', 'message' => 'Request method not handled']);

@@ -90,7 +90,33 @@ async function getItem(item_id, category) {
 
 async function generateCartItems(list, items) {
 
+    async function updateQuantity(category, itemId, newQuantity) {
+        let userId = await getUserId();
+        fetch('http://localhost:8080/php/cart.php', {
+            method: 'PUT',
+            body: JSON.stringify({
+                category: category,
+                item_id: itemId,
+                new_quantity: newQuantity,
+                user_id: userId
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            return response.text();
+        })
+        .then(data => console.log(data))
+        .catch(e => console.error(e))
+    }
+
     async function createItem(item) {
+        let itemQuantity = item.quantity;
+        let itemCategory = item.category;
+        let itemId = item.id;
+
         item = await getItem(item.id, item.category)
 
         let div = document.createElement('div');
@@ -99,15 +125,42 @@ async function generateCartItems(list, items) {
 
         let title = document.createElement('div');
         title.className = 'cart__item__title';
-        title.textContent = 'item.title';
+        title.textContent = item.title;
         
 
+        let quantityDiv = document.createElement('div');
+        quantityDiv.className = 'cart__item__quantity__container';
+        
+        let lower = document.createElement('div');
+        lower.textContent = '-';
+        lower.addEventListener('click', () => {
+            itemQuantity--;
+            if (itemQuantity < 1) {
+                quantity.textContent = '0';
+            } else {
+                quantity.textContent = itemQuantity;
+                updateQuantity(itemCategory, itemId, itemQuantity);
+            }
+        });
+
         let quantity = document.createElement('div');
-        quantity.className = 'cart__item__quantity';
-        quantity.textContent = item.quantity;
+        quantity.textContent = itemQuantity;
+        quantity.id = 'cart__item__quantity';
+
+        let greater = document.createElement('div');
+        greater.textContent = '+';
+        greater.addEventListener('click', () => {
+            itemQuantity++;
+            quantity.textContent = itemQuantity;
+            updateQuantity(itemCategory, itemId, itemQuantity);
+        });
+
+        quantityDiv.appendChild(lower);
+        quantityDiv.appendChild(quantity);
+        quantityDiv.appendChild(greater);
 
         div.appendChild(title);
-        div.appendChild(quantity);
+        div.appendChild(quantityDiv);
 
         return div;
     }
