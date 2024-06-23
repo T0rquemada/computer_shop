@@ -1,28 +1,26 @@
 window.onload = async () => {
-    checkSigned();
-    checkTheme();
-    let items = await getCart();
-    let list = document.getElementById('cart__items__list');
-    generateCartItems(list, items);
-};
+    let signed = await checkSigned();
+    if (signed) {
+        userSigned();
+        let items = await getCart();
+        let list = document.getElementById('cart__items__list');
 
-async function saveToCart(item) {
-    let userId = await getUserId();
-
-    fetch('http://localhost:8080/php/cart.php/updatecart', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({user_id: userId, item: item})
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error while savig item to cart');
+        if (items === null) {
+            list.textContent = 'Cart is empty!';
+        } else {
+            generateCartItems(list, items);
         }
-        return response.text();
-    })
-    .then(data => console.log(data))
-    .catch(e => console.error(e))
-}
+    } else {
+        alert('You should be signed!');
+        fillSignPopup(true);
+        active(popup__screen);
+        setPopupTitle('Sign In');
+    }
+    
+    checkTheme();
+
+    
+};
 
 function clearCart(user_id) {
     fetch('http://localhost:8080/php/cart.php', {
@@ -50,6 +48,9 @@ function clearCart(user_id) {
 // Returns items from cart
 async function getCart() {
     let userId = await getUserId();
+
+    if (userId === undefined) return 1;
+
     return fetch(`http://localhost:8080/php/cart.php?user_id=${userId}`, { method: 'GET' })
     .then(response => {
         if (!response.ok) {
@@ -57,18 +58,14 @@ async function getCart() {
         }
         return response.json();
     })
-    .then(data => { return JSON.parse(data.items); })
+    .then(data => { 
+        if (data !== null) {
+            return JSON.parse(data.items);
+        }
+
+        return null;
+    })
     .catch(e => console.error(e))
-}
-
-function addToCart(id, category) {
-    let item = {
-        id: id,
-        category: category,
-        quantity: 1
-    };
-
-    saveToCart(item);
 }
 
 function submitOrder() {
@@ -88,10 +85,33 @@ async function getItem(item_id, category) {
     .catch(e => console.error(e))
 }
 
+async function removeFromCart(category, id) {
+    document.getElementById(category + '-' + id).remove();    // Remove from page
+
+    const userId = await getUserId();
+    
+    if (userId === undefined) return 1;
+
+    fetch('http://localhost:8080/php/cart.php', {
+        method: 'DELETE',
+        body: JSON.stringify({
+            category: category,
+            item_id: id,
+            user_id: userId
+        })
+    })
+    .then(response => response.text())
+    .then(data => console.log(data))
+    .catch(e => console.error(e))
+}
+
 async function generateCartItems(list, items) {
 
     async function updateQuantity(category, itemId, newQuantity) {
         let userId = await getUserId();
+
+        if (userId === undefined) return 1;
+
         fetch('http://localhost:8080/php/cart.php', {
             method: 'PUT',
             body: JSON.stringify({
@@ -121,7 +141,7 @@ async function generateCartItems(list, items) {
 
         let div = document.createElement('div');
         div.className = 'cart__item';
-        div.id = item.category + '-' + item.id;
+        div.id = itemCategory + '-' + itemId;
 
         let title = document.createElement('div');
         title.className = 'cart__item__title';
@@ -130,13 +150,13 @@ async function generateCartItems(list, items) {
 
         let quantityDiv = document.createElement('div');
         quantityDiv.className = 'cart__item__quantity__container';
-        
         let lower = document.createElement('div');
         lower.textContent = '-';
         lower.addEventListener('click', () => {
-            itemQuantity--;
-            if (itemQuantity < 1) {
+            --itemQuantity;
+            if (itemQuantity === 0) {
                 quantity.textContent = '0';
+                removeFromCart(itemCategory, itemId);
             } else {
                 quantity.textContent = itemQuantity;
                 updateQuantity(itemCategory, itemId, itemQuantity);
@@ -174,4 +194,4 @@ async function generateCartItems(list, items) {
         let itemDiv = await createItem(item);
         list.appendChild(itemDiv);
     }
-}   
+}

@@ -1,5 +1,3 @@
-let signed = false;
-
 const signinBtn = document.getElementById('sign_inBtn');
 const signupBtn = document.getElementById('sign_upBtn');
 
@@ -43,8 +41,13 @@ function saveUser(email, password) {
 }
 
 async function getUserId() {
-    let email = getUserFromCookie()[0];
-
+    let email;
+    try {
+        email = getUserFromCookie()[0];
+    } catch (e) {
+        console.error(e);
+        return undefined;
+    }
     return fetch(`http://localhost:8080/php/users.php/userid?email=${email}`, {
         method: 'GET',
         headers: {'Content-Type': 'application/json'}
@@ -111,7 +114,7 @@ function userSigned() {
     signed = true;
 }
 
-// Make request to log in user
+// Return true | false | undefined
 async function checkSigned() {
     let userCookie = getUserFromCookie();
 
@@ -129,9 +132,11 @@ async function checkSigned() {
 
             if (result) {
                 userSigned();
+                return true; 
             } else {
                 showSigninBtns();
-                console.log("User credentials incorrect, received false from server.")
+                console.log("User credentials incorrect, received false from server.");
+                return false;
             }
         } catch (e) {
             console.error(e);
@@ -140,6 +145,7 @@ async function checkSigned() {
     } else {
         console.log("Cookies empty");
         showSigninBtns();
+        return undefined;
     }
 }
 

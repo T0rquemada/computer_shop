@@ -1,5 +1,7 @@
-window.onload = () => {
-    checkSigned(); // Check user credentials in cookies
+window.onload = async () => {
+    let signed = await checkSigned();
+    if (signed) userSigned();
+    
     checkTheme();
 }
 
