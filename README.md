@@ -21,20 +21,20 @@
 - [X] Sort items by price
 - [X] Filter items by characteristics
 - [ ] Cart chosen items
-  - [ ] Add/remove to/from cart
+  - [X] Add/remove to/from cart
   - [ ] Store order on submit in orders.json
-  - [ ] Clearing cart button
+  - [X] Clearing cart button
   - [X] Storing not submitted cart in DB
 - [ ] User can select only mails from DB
+- [ ] Submit pop up on "Enter"
 ## Level 2
 - [X] Theme switcher
   - [X] Save user choice in localstorage
-- [ ] Item details (pop up / separate page)
 - [ ] Show quantity of items on "Cart" button in right corner of word
-## Level 3
-- [ ] Submit pop up on "Enter"
-- [ ] Make categories in sidebar generating dynamically
 - [ ] Remove price from filters
+## Level 3
+- [ ] Item details (pop up / separate page)
+- [ ] Make categories in sidebar generating dynamically
 
 ## Project tree
 ![project tree](tree.png)
