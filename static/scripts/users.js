@@ -157,6 +157,8 @@ function signIn(user) {
                 let userDB = JSON.parse(response[1]);
                 clearAllCookies();
                 saveUser(userDB.email, userDB.password);
+
+                if (window.location.href.indexOf('static/pages/cart.php') !== -1) location.reload();
             } else {
                 alert('Something get wrong! Look console logs');
             }

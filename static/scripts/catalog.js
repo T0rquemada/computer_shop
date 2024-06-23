@@ -158,6 +158,34 @@ function filterItems(items) {
     })
 }
 
+async function saveToCart(item) {
+    let userId = await getUserId();
+
+    fetch('http://localhost:8080/php/cart.php/updatecart', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_id: userId, item: item})
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error while savig item to cart');
+        }
+        return response.text();
+    })
+    .then(data => console.log(data))
+    .catch(e => console.error(e))
+}
+
+function addToCart(id, category) {
+    let item = {
+        id: id,
+        category: category,
+        quantity: 1
+    };
+
+    saveToCart(item);
+}
+
 function generateItems(items, categoryTitle) {
     // Return item in div
     function createItem(item, categoryTitle) {

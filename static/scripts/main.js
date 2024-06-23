@@ -1,7 +1,7 @@
 window.onload = async () => {
     let signed = await checkSigned();
     if (signed) userSigned();
-    
+
     checkTheme();
 }
 
@@ -268,6 +268,7 @@ themeBtn.addEventListener('click', () => {
 let cartBtn = document.getElementById('items_cart');
 
 cartBtn.addEventListener('click', async () => {
+    let signed = await checkSigned();
     if (signed) {
         if (window.location.href.indexOf('static/pages/cart.php') === -1) {
             window.location.href = 'static/pages/cart.php';

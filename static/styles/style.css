@@ -243,6 +243,25 @@ header {
     background-color: red;
 }
 
+.cart__item__quantity__container {
+    display: flex;
+}
+
+.cart__item__quantity__container>* {
+    margin: 0 0.25rem;
+}
+
+.cart__btns {
+    display: flex;
+    justify-content: center;
+}
+
+.cart__btns>button {
+    padding: 0.25rem;
+    margin: 1rem;
+    border-radius: 10px;
+}
+
 @media (max-width: 64rem) {
     .sidebar__container {
         width: 22%;
