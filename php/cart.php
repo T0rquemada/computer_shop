@@ -4,6 +4,10 @@ require "database.php";
 
 header('Content-Type: application/json');
 
+function send_json_log(string $status, string $message) {
+    echo json_encode(['status' => $status, 'message' => $message]);
+}
+
 // Return body requests, decoding from JSON
 function get_json_input() {
     $jsonData = file_get_contents('php://input');
@@ -20,7 +24,7 @@ function cart_exist(int $user_id) : bool {
     return $result > 0;
 }
 
-function create_cart($user_id, $items) {
+function create_cart($user_id, $items): void {
     global $pdo;
     $stmt = $pdo->prepare('INSERT INTO cart (user_id, items) VALUES (?, ?)');
     $stmt->execute([$user_id, json_encode([$items])]);
@@ -31,6 +35,10 @@ function get_cart($user_id) {
     $stmt = $pdo->prepare('SELECT * FROM cart WHERE user_id = ?');
     $stmt->execute([$user_id]);
     $cart = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!is_array($cart)) {
+        return null;
+    }
 
     return $cart;
 }
@@ -62,7 +70,7 @@ function unite_items($items) {
     return $united_items;
 }
 
-function update_cart($user_id, $new_item) {
+function update_cart($user_id, $new_item): void {
     global $pdo;
 
     $cart = get_cart($user_id);
@@ -83,9 +91,11 @@ function update_cart($user_id, $new_item) {
 function delete_cart($user_id) {
     global $pdo;
     $stmt = $pdo->prepare('DELETE FROM cart WHERE user_id = ?');
+    $stmt->execute([$user_id]);
+    send_json_log('Success', 'Cart cleared successfully!');
 }
 
-function get_item($item_id, $category, $user_id=null, $cart=false) {
+function get_item($item_id, $category, $user_id=null, bool $cart=false) {
     global $pdo;
 
     $sql;
@@ -123,9 +133,21 @@ function get_item($item_id, $category, $user_id=null, $cart=false) {
     }
 }
 
-// Replace item in cart['items']
-function replace_item($new_item, $old_item, $user_id) {
+function set_items($items, int $user_id): void {
     global $pdo;
+
+    $stmt = $pdo->prepare('UPDATE cart SET items = ? WHERE user_id = ?');
+    $stmt->execute([json_encode($items), $user_id]);
+
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Items updated!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'No rows affected.']);
+    }
+}
+
+// Replace item in cart['items']
+function replace_item($new_item, $old_item, int $user_id): void {
     $cart = get_cart($user_id);
     $items = json_decode($cart['items'], true);
     
@@ -136,16 +158,24 @@ function replace_item($new_item, $old_item, $user_id) {
     }
 
     unset($item);
-    
-    $stmt = $pdo->prepare('UPDATE cart SET items = ? WHERE user_id = ?');
-    $stmt->execute([json_encode($items), $user_id]);
 
-    if ($stmt->rowCount() > 0) {
-        echo json_encode(['status' => 'success', 'message' => 'Quantity updated!']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'No rows affected.']);
+    set_items($items, $user_id);
+}
+
+function delete_item($item_to_delete, $user_id): void {
+    global $pdo;
+    $cart = get_cart($user_id);
+    $items = json_decode($cart['items'], true);
+
+    foreach ($items as $key => $item) {
+        if ($item['id'] === $item_to_delete['id'] && $item['category'] === $item_to_delete['category']) {
+            unset($items[$key]);
+            send_json_log('success', 'Item removed from cart');
+            set_items($items, $user_id);
+            break;
+        }
     }
-    
+    send_json_log('error', 'Item not removed from cart!');
 }
 
 $cart_data = get_json_input();
@@ -188,11 +218,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         else echo json_encode($item); 
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'DELETE' && isset($cart_data['user_id'])) {
-    $user_id = $cart_data['user_id'];
+    // Delete item from cart
+    if (isset($cart_data['category'], $cart_data['item_id'], $cart_data['user_id'])) {
+        $user_id = $cart_data['user_id'];
+        $item_id = $cart_data['item_id'];
+        $category = $cart_data['category'];
 
-    if (cart_exist($user_id)) {
-        delete_cart($user_id);
-    } else echo "Cart user with id: " . $user_id . ", doesn't exist.";
+        $item_to_delete = [
+            "id" => $item_id,
+            "category" => $category
+        ];
+
+        delete_item($item_to_delete, $user_id);
+    } 
+    // Delete entire cart
+    else {
+        $user_id = $cart_data['user_id'];
+
+        if (cart_exist($user_id)) {
+            delete_cart($user_id);
+        } else echo "Cart user with id: " . $user_id . ", doesn't exist.";
+    }
 } else if ($_SERVER['REQUEST_METHOD'] === 'PUT' && isset($cart_data['category'], $cart_data['item_id'], $cart_data['new_quantity'])) {
     $category = $cart_data['category'];
     $item_id = $cart_data['item_id'];

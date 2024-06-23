@@ -26,6 +26,11 @@
         </div>
     </div>
 
+    <div class="cart__btns">
+        <button class="header__btn" id="clear__cart__btn">Clear cart</button>
+        <button class="header__btn" id="submit__order__btn">Submit order</button>
+    </div>
+
     <div id='cart__container'>
         <div id="cart__items__list"></div>
     </div>

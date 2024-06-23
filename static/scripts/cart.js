@@ -35,10 +35,11 @@ function clearCart(user_id) {
             throw new Error('Network response was not ok ' + response.statusText)
         }
 
-        return response.json();
+        return response.text();
     })
     .then(data => {
         console.log('Success:', data);
+        location.reload();
     })
     .catch(error => {
         console.error('Error:', error);
@@ -195,3 +196,16 @@ async function generateCartItems(list, items) {
         list.appendChild(itemDiv);
     }
 }
+
+/* Buttons part */
+const clearCartBtn = document.getElementById('clear__cart__btn');
+const submitOrderBtn = document.getElementById('submit__order__btn');
+
+clearCartBtn.addEventListener('click', async () => {
+    const userId = await getUserId();
+    clearCart(userId);
+});
+
+submitOrderBtn.addEventListener('click', () => {
+    console.log('submitOrderBtn');
+});
