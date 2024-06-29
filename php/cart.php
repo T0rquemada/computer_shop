@@ -106,7 +106,8 @@ function get_item($item_id, $category, $user_id=null, bool $cart=false) {
     if ($cart) {
         $items = get_cart($user_id);
     } else {
-        $id = $category . "_id";
+        if ($category === "motherboards") $id = 'motherboard' . "_id";
+        else $id = $category . "_id";
         $sql = $pdo->prepare("SELECT * FROM $category WHERE $id = ?");
         $sql->execute([$item_id]);
         $item = $sql->fetch(PDO::FETCH_ASSOC);
@@ -170,8 +171,14 @@ function delete_item($item_to_delete, $user_id): void {
     foreach ($items as $key => $item) {
         if ($item['id'] === $item_to_delete['id'] && $item['category'] === $item_to_delete['category']) {
             unset($items[$key]);
-            send_json_log('success', 'Item removed from cart');
-            set_items($items, $user_id);
+            
+            if (!empty($items)) {
+                set_items($items, $user_id);
+                send_json_log('success', 'Item removed from cart');
+            } else {
+                delete_cart($user_id);
+            }
+            
             break;
         }
     }

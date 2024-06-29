@@ -31,6 +31,8 @@
         <button class="header__btn" id="submit__order__btn">Submit order</button>
     </div>
 
+    <div id="total__price__container"></div>
+
     <div id='cart__container'>
         <div id="cart__items__list"></div>
     </div>
