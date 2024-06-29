@@ -25,16 +25,21 @@
   - [ ] Store order on submit in orders.json
   - [X] Clearing cart button
   - [X] Storing not submitted cart in DB
-- [ ] User can select only mails from DB
-- [ ] Submit pop up on "Enter"
+- [X] User can select only mails from DB
+- [X] Submit pop up on "Enter"
 ## Level 2
 - [X] Theme switcher
   - [X] Save user choice in localstorage
 - [ ] Show quantity of items on "Cart" button in right corner of word
-- [ ] Remove price from filters
+- [X] Remove price from filters
 ## Level 3
 - [ ] Item details (pop up / separate page)
 - [ ] Make categories in sidebar generating dynamically
+
+## Little things & Bugs
+- [ ] Make body in pop up, and clear it depending on body, not how it looks now
+- [ ] Multiply JSON-response when delete last item from cart
+- [X] After delete item in cart on php Array of items transforms in object of items
 
 ## Project tree
 ![project tree](tree.png)

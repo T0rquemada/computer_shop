@@ -5,13 +5,14 @@ window.onload = async () => {
         userSigned();
         let userId = await getUserId();
         let items = await getCart(userId);
+        if (typeof(items) === 'object') items = Object.values(items);   // Transform object to arrray, BUG on php side
         let list = document.getElementById('cart__items__list');
 
         if (items === null) {
             list.textContent = 'Cart is empty!';
         } else {
             await generateCartItems(list, items)
-            setTotalprice();
+            setTotalprice(totalPriceContainer);
         }
     } else {
         alert('You should be signed!');
@@ -37,7 +38,7 @@ function calcTotalprice() {
 }
 
 // Sets total price to div
-function setTotalprice() {
+function setTotalprice(totalPriceContainer) {
     totalPriceContainer.textContent = `Total price: ${calcTotalprice()}`;
 }
 
@@ -177,12 +178,12 @@ async function generateCartItems(list, items) {
             if (itemQuantity === 0) {
                 quantity.textContent = '0';
                 removeFromCart(itemCategory, itemId);
-                setTotalprice();
+                setTotalprice(totalPriceContainer);
             } else {
                 quantity.textContent = itemQuantity;
                 updateQuantity(itemCategory, itemId, itemQuantity);
                 div.setAttribute('quantity', itemQuantity);
-                setTotalprice();
+                setTotalprice(totalPriceContainer);
             }
         });
 
@@ -198,7 +199,7 @@ async function generateCartItems(list, items) {
             quantity.textContent = itemQuantity;
             updateQuantity(itemCategory, itemId, itemQuantity);
             div.setAttribute('quantity', itemQuantity);
-            setTotalprice();
+            setTotalprice(totalPriceContainer);
         });
 
         quantityDiv.appendChild(lower);
@@ -253,12 +254,18 @@ async function fillSubmitPopup() {
         const {mail_id, company, department_number, city, street} = mail;
 
         let option = document.createElement('option');
-        option.textContent = company + ' ' + department_number + ' ' + city;
+        option.textContent = company.replace('_', ' ') + ' ' + department_number + ' ' + city;
         select.appendChild(option);
     })
 
     popUp.insertBefore(label, popupFooter);
     popUp.insertBefore(select, popupFooter);
+
+    let totalPrice = document.createElement('div');
+    totalPrice.className = 'total__price__submit'
+    setTotalprice(totalPrice);
+
+    popUp.insertBefore(totalPrice, popupFooter)
 
 }
 

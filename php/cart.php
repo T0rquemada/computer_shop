@@ -179,7 +179,7 @@ function delete_item($item_to_delete, $user_id): void {
                 delete_cart($user_id);
             }
             
-            break;
+            return;
         }
     }
     send_json_log('error', 'Item not removed from cart!');

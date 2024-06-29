@@ -32,6 +32,14 @@ input {
     color: var(--black);
 }
 
+select {
+    color: var(--black);
+}
+
+option {
+    color: var(--black);
+}
+
 .container {
     display: flex;
     justify-content: space-between;
@@ -165,7 +173,7 @@ header {
 }
 
 .header__title {
-    user-select: none;
+    cursor: pointer;
 }
 
 .header__right__part {
@@ -260,6 +268,14 @@ header {
     padding: 0.25rem;
     margin: 1rem;
     border-radius: 10px;
+}
+
+#total__price__container {
+    text-align: center;
+}
+
+.total__price__submit {
+    margin: 0.75rem 0;
 }
 
 @media (max-width: 64rem) {
