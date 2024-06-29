@@ -117,7 +117,9 @@ function createFiltersDiv(keys, values) {
 
     let keysLength = keys.length;
     for (let i = 0; i < keysLength; i++) {
-        filtersContainer.appendChild(createFilter(keys[i], values[i]));
+        if (keys[i] !== 'price') {
+            filtersContainer.appendChild(createFilter(keys[i], values[i]));
+        } 
     }
 
     return filtersContainer;
