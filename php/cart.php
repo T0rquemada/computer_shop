@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             break;
         default:
-            echo 'Default case for switch.';
+            echo 'POST-route not found';
             break;
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {

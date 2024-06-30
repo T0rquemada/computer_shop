@@ -115,6 +115,8 @@ popupClose.addEventListener('click', () => {
 window.addEventListener('keydown', (key) => {
     if (key.key === 'Escape') {
         closePopup();
+    } else if (key.key === 'Enter') {
+        submitPopup();
     }
 });
 
@@ -122,8 +124,9 @@ popupCancel.addEventListener('click', () => {
     closePopup();
 });
 
-popupSubmit.addEventListener('click', () => {
-    if (checkPopupInputs() === false) {
+// Resposne for submitting pop-up
+function submitPopup() {
+    if (checkPopupInputs() === false && popupTitle.textContent !== 'Submit order') {
         alert('All fields must be filled!');
     } else {
         switch (popupTitle.textContent) {
@@ -133,13 +136,17 @@ popupSubmit.addEventListener('click', () => {
             case 'Sign In':
                 submitUser(signIn, true);
                 break;
-            case 'Cart':
+            case 'Submit order':
                 submitOrder();
                 break;
             default:
                 throw new Error('Error while submitting...');
         }
     }
+}
+
+popupSubmit.addEventListener('click', () => {
+    submitPopup();
 });
 
 
@@ -166,6 +173,9 @@ function submitUser(func, signin=false) {
 
 // If even one input Pop-up empty, return false
 function checkPopupInputs() {
+
+    if (popupTitle.textContent === 'Submit order') return false;
+
     const inputsDiv = document.querySelectorAll('.label_input__container');
     let inputs = [];
     inputsDiv.forEach(div => inputs.push(div.querySelector('input')));

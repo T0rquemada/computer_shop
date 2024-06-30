@@ -20,9 +20,9 @@
 ## Level 1
 - [X] Sort items by price
 - [X] Filter items by characteristics
-- [ ] Cart chosen items
+- [X] Cart chosen items
   - [X] Add/remove to/from cart
-  - [ ] Store order on submit in orders.json
+  - [X] Store order on submit in orders.json
   - [X] Clearing cart button
   - [X] Storing not submitted cart in DB
 - [X] User can select only mails from DB
@@ -38,7 +38,6 @@
 
 ## Little things & Bugs
 - [ ] Make body in pop up, and clear it depending on body, not how it looks now
-- [ ] Multiply JSON-response when delete last item from cart
 - [X] After delete item in cart on php Array of items transforms in object of items
 
 ## Project tree

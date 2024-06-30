@@ -87,8 +87,24 @@ async function getCart(userId) {
     .catch(e => console.error(e))
 }
 
-function submitOrder() {
-    console.log('order')
+async function submitOrder() {
+    let selectedMail = document.getElementById('mail__select').value;
+    selectedMail = selectedMail.replace(' ', '_');
+
+    fetch('http://localhost:8080/php/orders.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            mail: selectedMail,
+            user_id: await getUserId(),
+            total_price: calcTotalprice()
+        })
+    })
+    .then(response => response.text())
+    .then(data => console.log(data))
+    .catch(e => console.error(e))
 }
 
 // Depending on id and category return item
@@ -266,7 +282,6 @@ async function fillSubmitPopup() {
     setTotalprice(totalPrice);
 
     popUp.insertBefore(totalPrice, popupFooter)
-
 }
 
 /* Buttons part */
