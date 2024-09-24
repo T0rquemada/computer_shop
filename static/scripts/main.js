@@ -41,50 +41,28 @@ function showSigninBtns() {
     signinBtn.style.display = "inline-block";
 }
 
-// Make POST-request on server with endpoint, sending object
-async function postRequest(object, php_file) {
-    return fetch(`http://localhost:8080/php/${php_file}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(object)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Fail while request on server');
+async function request(method, object, php_file) {
+    if (!method) throw new Error('Method for request not provided!');
+
+    try {
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
             }
-            return response.text();
-        })
-        .then(data => {
-            if (data.indexOf('!') !== -1) {
-                console.log('Response from server: ', data.slice(0, data.indexOf('!')+1)); // Print response without userdata
-            } else console.log('Response from server: ', data);
+        };
 
-            let response = data;
+        if (method !== 'GET') options.body = JSON.stringify(object);
 
-            // In sign in/up case, return true and array with user data
-            if (response.indexOf('"email":') !== -1 && response.includes('successfully')) { //Check that we retrieve user in json
-                response = response.slice(response.indexOf('!')+1);
-                let user = response;
+        let response = await fetch(`http://localhost:8080/php/${php_file}`, options);
 
-                return [true, user];
-            }
+        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
-            if (response.includes('User with this email does not exist!') || response.includes('Wrong password!')) {
-                return false;
-            }
-
-            if (response.includes('User already exist!')) {
-                return 'User already exist!';
-            }
-
-            return false;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            return false;
-        });
+        return await response.json();
+    } catch (err) {
+        console.error(`Request failed: ${err.message}`);
+        return null;
+    }
 }
 
 const headerTitle = document.getElementById('header__title');

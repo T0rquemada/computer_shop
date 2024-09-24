@@ -1,6 +1,45 @@
 <?php
 /** @var PDO $pdo */
 require "database.php";
+require '../vendor/autoload.php';
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Firebase\JWT\ExpiredException;
+
+// Returns JWT with user email&password
+function generate_jwt(?array $user): string {
+    global $secret_key;
+    if (!$secret_key) throw new ExpiredException("Secret key not set");
+    if (!$user) throw new ExpiredException("User not found");
+
+    $payload = [
+        'iat' => time(),
+        'email' => $user['email'],
+        'password' => $user['password'],
+//        'user_id' => $user_id
+    ];
+
+    return JWT::encode($payload, $secret_key, 'HS256');
+}
+
+// Return array with email and password, which parsed from jwt
+function parse_jwt(string $jwt): ?array {
+    global $secret_key;
+
+    try {
+        $decoded = JWT::decode($jwt, new Key($secret_key, 'HS256'));
+        $decoded_array = (array) $decoded; // Convert to array
+
+        $email = $decoded_array['email'];
+        $password = $decoded_array['password'];
+
+        return ['email' => $email, 'password' => $password];
+    } catch (Exception $e) {
+        error_log('JWT decode error: ' . $e->getMessage());
+        return null;
+    }
+}
 
 function get_json_input() {
     $jsonData = file_get_contents('php://input');
@@ -82,15 +121,48 @@ function verify_user($pdo, $user): bool {
     return false;
 }
 
+# Handle email and password, and try sign in
+function sign_in(array $user): void {
+    global $pdo;
+
+    if (empty($user['email'])) {
+        http_response_code(500);
+        echo json_encode(['status' => false, 'message' => 'user email not provided!']);
+    }
+
+    if (empty($user['password'])) {
+        http_response_code(500);
+        echo json_encode(['status' => false, 'message' => 'user password not provided!']);
+    }
+
+    // Check if the user exists
+    if (user_already_exist('email', $user['email'])) {
+        // Verify email and password
+        if (verify_user($pdo, $user)) {
+            $jwt = generate_jwt($user);
+            http_response_code(200);
+            echo json_encode(['status' => true, 'message' => 'Logged in successfully!', 'jwt' => $jwt]);
+        } else {
+            http_response_code(400);
+            echo json_encode(['status' => false, 'message' => "Incorrect userdata while sign in"]);
+        }
+    } else {
+        http_response_code(404);
+        echo json_encode(['status' => false, 'message' => "User does not exist!"]);
+    }
+}
+
+$secret_key = 'YMAMWhdVsg0Qyw0Ei6TzcPm4CAeOnKGKRtNw2PdnE2Q=';
+
 $requested_url = $_SERVER['REQUEST_URI'];
 $base_url = '/php/users.php';
 $route = str_replace($base_url, '', $requested_url);    // Cut off base_url from requested_url
 
+// Routing for POST-methods
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userdata = get_json_input();
     check_json_error();
 
-    // Routing for sin in/sign up
     switch ($route) {
         case '/signup':
             $correct_data = isset($userdata['email'], $userdata['nickname'], $userdata['password'], $userdata['phone']);
@@ -105,31 +177,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (!user_already_exist('username', $user['username'])) {
                     insert_user($user);
-                    echo "User added successfully!";
-                    echo json_encode($user);
-                } else echo "User with this username already exist!\n";
-            } else echo 'Incorrect json data while sign up!';
+                    $jwt = generate_jwt($user);
+                    echo json_encode(['jwt' => $jwt, 'message' => 'User added successfully!']);
+                } else {
+                    http_response_code(409);
+                    echo json_encode(['message' => "User with this username already exist!"]);
+                }
+            } else {
+                http_response_code(400);
+                echo 'Incorrect json data while sign up!';
+            }
 
             break;
         case '/signin':
-            if (isset($userdata['email'], $userdata['password'])) {
+            $user = [];
+            if (isset($userdata['jwt'])) {
+                $jwt = parse_jwt($userdata['jwt']);
+                $user = [
+                    'email' => $jwt['email'],
+                    'password' => $jwt['password']
+                ];
+            } else if (isset($userdata['email'], $userdata['password'])) {
                 $user = [
                     'email' => $userdata['email'],
                     'password' => $userdata['password']
                 ];
+            } else {
+                http_response_code(400);
+                echo json_encode(['status' => false, 'message' => "Incorrect JSON data while sign in!"]);
+            }
 
-                if (user_already_exist('email', $user['email'])) {
-                    if (verify_user($pdo, $user)) {
-                        echo "Logged successfully!";
-                        echo json_encode($user);
-                    } else echo "Incorrect data while sign in";
-                } else echo "User does not exist!\n";
-            } else echo "Incorrect JSON data while sign in!\n";
-
+            sign_in($user);
             break;
         default:
-            header("HTTP/1.0 404 Not Found");
-            echo "Route not found";
+            http_response_code(404);
+            echo json_encode(["message" => "Route not found"]);
             break;
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {

@@ -34,10 +34,9 @@ const phoneDiv = createInput('Phone', 'phone');
 
 let emailInput, passInput, nicknameInput, phoneInput;   // Init inputs
 
-// Save user email & password in cookie
-function saveUser(email, password) {
-    document.cookie = `user_email=${encodeURIComponent(email)}; path=/; max-age=604800`;
-    document.cookie = `user_password=${encodeURIComponent(password)}; path=/; max-age=604800`;
+// Save JWT in cookie
+function saveJWT(jwt) {
+    document.cookie = `jwt=${encodeURIComponent(jwt)}; path=/; max-age=604800`;
 }
 
 async function getUserId() {
@@ -60,38 +59,27 @@ async function getUserId() {
 function getUserFromCookie() {
     const cookies = document.cookie.split(';');
 
-    let email = '';
-    let password = '';
+    let jwt = cookies
+        .map(cookie => cookie.trim())
+        .find(cookie => cookie.startsWith('jwt='));
 
-    cookies.forEach(cookie => {
-        let [name, value] = cookie.split('=');
+    if (jwt) {
+        jwt = jwt.split('=')[1];
+        jwt = decodeURIComponent(jwt);
+    }
 
-        name = name.replace(' ', '');   // Remove spaces
+    if (!jwt || jwt === 'undefined') return undefined;
 
-        if (name === 'user_email') email = decodeURIComponent(value);
-        else if (name === 'user_password') password = decodeURIComponent(value);
-    })
-
-    // If userdata empty or undefined, return undefined
-    let userdata_undefined = email === 'undefined' && password === 'undefined';
-    let userdata_empty = email === '' && password === '';
-    if (userdata_undefined || userdata_empty) return undefined;
-
-    return [email, password];
+    return jwt;
 }
 
 /*Sign up part*/
-function signUp(user) {
-    // Send user's data on server while register
-    postRequest(user, 'users.php/signup')
-        .then(response => {
-            // console.log(response);
-            if (response[0]) {
-                userSigned();
-                let userDB = JSON.parse(response[1]);
-                saveUser(userDB.email, userDB.password);
-            } else console.log('Something get wrong while sign up');
-        });
+async function signUp(user) {
+    let data = await request('POST', user, 'users.php/signup');
+    if (data) {
+        saveJWT(data.jwt);
+        userSigned();
+    } else console.error('Receive null in request: ');
 }
 
 // Activate Pop-up screen with pop-up container
@@ -119,16 +107,12 @@ async function checkSigned() {
     let userCookie = getUserFromCookie();
 
     if (userCookie !== undefined) {
-        let userEmail = userCookie[0];
-        let userPass = userCookie[1];
-
         let user = {
-            email: userEmail,
-            password: userPass
+            jwt: userCookie
         }
 
         try {
-            const result = await postRequest(user, 'users.php/signin');
+            const result = await request('POST', user, 'users.php/signin');
 
             if (result) {
                 userSigned();
@@ -149,20 +133,15 @@ async function checkSigned() {
     }
 }
 
-function signIn(user) {
-    postRequest(user, 'users.php/signin')
-        .then((response) => {
-            if (response[0]) {
-                userSigned();
-                let userDB = JSON.parse(response[1]);
-                clearAllCookies();
-                saveUser(userDB.email, userDB.password);
+async function signIn(user) {
+    let data = await request('POST', user, 'users.php/signin');
 
-                if (window.location.href.indexOf('static/pages/cart.php') !== -1) location.reload();
-            } else {
-                alert('Something get wrong! Look console logs');
-            }
-        })
+    if (data) {
+        saveJWT(data.jwt);
+        userSigned();
+        clearAllCookies();
+        if (window.location.href.indexOf('static/pages/cart.php') !== -1) location.reload();
+    } else console.error('Receive null in request!');
 }
 
 signinBtn.addEventListener('click', () => {
