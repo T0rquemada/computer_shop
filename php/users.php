@@ -215,13 +215,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (isset($_GET['email'])) {
-        $email = $_GET['email'];
+    if (isset($_GET['jwt'])) {
+        $jwt = $_GET['jwt'];
+        $email = parse_jwt($jwt)['email'];
 
         if (user_already_exist("email", $email)) {
-            echo json_encode(['user_id' => get_userid($email)]);
-        } else echo json_encode(['message' => "User with this email doesn't exist!"]);
+            echo json_encode(['user_id' => get_userid($email), 'message' => 'user_id fetched successfully!']);
+        } else {
+            http_response_code(404);
+            echo json_encode(['message' => "User with this email doesn't exist!"]);
+        }
 
-    } else echo json_encode(['message' => "Incorrect json data while getting user id!"]);
- 
+    } else {
+        http_response_code(400);
+        echo json_encode(['message' => "Incorrect json data while getting user id!"]);
+    }
 }

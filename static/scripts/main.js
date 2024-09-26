@@ -41,7 +41,7 @@ function showSigninBtns() {
     signinBtn.style.display = "inline-block";
 }
 
-async function request(method, object, php_file) {
+async function request(method, php_file, object=undefined) {
     if (!method) throw new Error('Method for request not provided!');
 
     try {
@@ -55,12 +55,12 @@ async function request(method, object, php_file) {
         if (method !== 'GET') options.body = JSON.stringify(object);
 
         let response = await fetch(`http://localhost:8080/php/${php_file}`, options);
+        let data = await response.json();
+        if (!response.ok) throw new Error(`Error ${response.status}, ${data.message}`);
 
-        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-
-        return await response.json();
+        return await data;
     } catch (err) {
-        console.error(`Request failed: ${err.message}`);
+        alert(`Request failed: ${err.message}`);
         return null;
     }
 }
@@ -141,8 +141,8 @@ function submitUser(func, signin=false) {
         };
 
         if (!signin) {
-            user = {nickname: nicknameInput.value, ...user};
-            user = {phone: phoneInput.value, ...user};
+            user.nickname = nicknameInput.value
+            user.phone = phoneInput.value;
         }
 
         func(user);

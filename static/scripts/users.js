@@ -40,20 +40,9 @@ function saveJWT(jwt) {
 }
 
 async function getUserId() {
-    let email;
-    try {
-        email = getUserFromCookie();
-    } catch (e) {
-        console.error(e);
-        return undefined;
-    }
-    return fetch(`http://localhost:8080/php/users.php/userid?email=${email}`, {
-        method: 'GET',
-        headers: {'Content-Type': 'application/json'}
-    })
-    .then(response => response.json())
-    .then(data => {return data})
-    .catch(e => console.error(e))
+    let jwt = getUserFromCookie();
+
+    return await request('GET', `users.php/userid?jwt=${jwt}`);
 }
 
 function getUserFromCookie() {
@@ -75,7 +64,7 @@ function getUserFromCookie() {
 
 /*Sign up part*/
 async function signUp(user) {
-    let data = await request('POST', user, 'users.php/signup');
+    let data = await request('POST', 'users.php/signup', user);
     if (data) {
         saveJWT(data.jwt);
         userSigned();
@@ -112,7 +101,7 @@ async function checkSigned() {
         }
 
         try {
-            const result = await request('POST', user, 'users.php/signin');
+            const result = await request('POST', 'users.php/signin', user);
 
             if (result) {
                 userSigned();
@@ -134,7 +123,7 @@ async function checkSigned() {
 }
 
 async function signIn(user) {
-    let data = await request('POST', user, 'users.php/signin');
+    let data = await request('POST', 'users.php/signin', user);
 
     if (data) {
         saveJWT(data.jwt);
