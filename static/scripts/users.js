@@ -36,7 +36,7 @@ let emailInput, passInput, nicknameInput, phoneInput;   // Init inputs
 
 // Save JWT in cookie
 function saveJWT(jwt) {
-    document.cookie = `jwt=${encodeURIComponent(jwt)}; HttpOnly; SameSite=Strict; path=/; max-age=604800`;
+    document.cookie = `jwt=${encodeURIComponent(jwt)}; path=/; max-age=604800`;
 }
 
 async function getUserId() {
@@ -157,7 +157,6 @@ signinBtn.addEventListener('click', () => {
 const signoutBtn = document.getElementById('sign_outBtn');
 signoutBtn.style.display = "none";
 
-// Clear data stored on client
 signoutBtn.addEventListener('click', () => {
     clearAllCookies();
     location.reload();  // Reload page
