@@ -219,9 +219,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = $_GET['email'];
 
         if (user_already_exist("email", $email)) {
-            echo get_userid($email);
-        } else echo json_encode("User with this email doesn't exist!");
+            echo json_encode(['user_id' => get_userid($email)]);
+        } else echo json_encode(['message' => "User with this email doesn't exist!"]);
 
-    } else echo json_encode("Incorrect json data while getting user id!");
+    } else echo json_encode(['message' => "Incorrect json data while getting user id!"]);
  
 }

@@ -36,13 +36,13 @@ let emailInput, passInput, nicknameInput, phoneInput;   // Init inputs
 
 // Save JWT in cookie
 function saveJWT(jwt) {
-    document.cookie = `jwt=${encodeURIComponent(jwt)}; path=/; max-age=604800`;
+    document.cookie = `jwt=${encodeURIComponent(jwt)}; HttpOnly; SameSite=Strict; path=/; max-age=604800`;
 }
 
 async function getUserId() {
     let email;
     try {
-        email = getUserFromCookie()[0];
+        email = getUserFromCookie();
     } catch (e) {
         console.error(e);
         return undefined;
@@ -139,7 +139,7 @@ async function signIn(user) {
     if (data) {
         saveJWT(data.jwt);
         userSigned();
-        clearAllCookies();
+
         if (window.location.href.indexOf('static/pages/cart.php') !== -1) location.reload();
     } else console.error('Receive null in request!');
 }
