@@ -1,7 +1,10 @@
 <?php
 /** @var PDO $pdo */
 require "database.php";
-require '../vendor/autoload.php';
+require '../../vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+$dotenv->load();
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -177,7 +180,7 @@ function sign_in_jwt(string $jwt): void {
     }
 }
 
-$secret_key = 'YMAMWhdVsg0Qyw0Ei6TzcPm4CAeOnKGKRtNw2PdnE2Q=';
+$secret_key = $_ENV['JWT_SECRET'];
 
 $requested_url = $_SERVER['REQUEST_URI'];
 $base_url = '/php/users.php';

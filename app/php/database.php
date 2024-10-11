@@ -1,10 +1,15 @@
 <?php
 
+require '../../vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
+$dotenv->load();
+
 # Configure Database
 $host = 'localhost';
 $db = 'computer_shop';
-$user = 'root';
-$pass = '1234';        // Change
+$user = $_ENV['DB_USER'];
+$pass = $_ENV['DB_PASS'];
 $charset = 'utf8mb4';
 
 $data_source_name = "mysql:host=$host;port=3306;dbname=$db;charset=$charset";
