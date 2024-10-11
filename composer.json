@@ -1,5 +1,16 @@
 {
+    "scripts": {
+        "test": "./vendor/bin/phpunit tests"
+    },
+    "autoload": {
+        "classmap": [
+            "app/"
+        ]
+    },
     "require": {
         "firebase/php-jwt": "^6.10"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11"
     }
 }

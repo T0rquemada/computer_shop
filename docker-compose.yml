@@ -1,0 +1,31 @@
+services:
+  php:
+    build: .
+    ports:
+      - "8080:80"  # Map port 8080 on your host to port 80 in the container
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: computer_shop
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3308:3306"  
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  db-data:
+
+networks:
+  app-network:

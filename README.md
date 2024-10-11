@@ -1,11 +1,20 @@
 # Computer shop
 
-*This webpage uses PHP version 8.3*
+## Functionality
+- Theme switcher
+   - Store user choice in localStorage
+- Items displayed in lists, divided by categories
+   - User can sort from cheap to expense
+   - User can filter by items characteristics
 
 ## Prerequisites
-- You have installed and running [MySQL](https://www.mysql.com/)
+- [PHP](https://www.php.net/)
+- [MySQL](https://www.mysql.com/)
 
 ## To start
+### Configure DB
+- locally
+- in docker
 1. Enter your password from MySQL database in php/database.php
 2. Set up database
    1. Run: ```mysql -u root -p```
@@ -16,32 +25,18 @@
 3. Run php server locally ```php -S localhost:8080 -t .```
 4. Open http://localhost:8080/
 
-# ToDo
-## Level 1
-- [X] Sort items by price
-- [X] Filter items by characteristics
-- [X] Cart chosen items
-  - [X] Add/remove to/from cart
-  - [X] Store order on submit in orders.json
-  - [X] Clearing cart button
-  - [X] Storing not submitted cart in DB
-- [X] User can select only mails from DB
-- [X] Submit pop up on "Enter"
-## Level 2
-- [X] Theme switcher
-  - [X] Save user choice in localstorage
-- [ ] Show quantity of items on "Cart" button in right corner of word
-- [X] Remove price from filters
-## Level 3
-- [ ] Item details (pop up / separate page)
-- [ ] Make categories in sidebar generating dynamically
+## ToDo:
+- [ ] Mobile version
+- [ ] Separate sign page for sign in / up
+- [ ] Add items via separate page (How magazie owner)
+- [X] Add PHPUnit tests
+   - [ ] GitHub Actions
+- [ ] Instead DOM manipulation make it in PHP
 
-## Little things & Bugs
-- [ ] Make body in pop up, and clear it depending on body, not how it looks now
-- [X] After delete item in cart on php Array of items transforms in object of items
-
-## Project tree
-![project tree](tree.png)
-
+## Tests
+- You can run tests via next command in terminal: ```composer test```
+- Project have next tests:
+   - Accessibility routes (home page, sign form)
+   
 ## Database Scheme
 ![Database scheme](db_scheme.png)
