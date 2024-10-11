@@ -21,5 +21,9 @@ jobs:
     - name: Prepare environment
       run: composer install
 
+    - name: Start PHP Server
+      run: |
+        php -S localhost:8080 -t app > /dev/null 2>&1 &
+
     - name: Run PHPUnit tests
       run: composer test
